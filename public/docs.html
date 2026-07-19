@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Framework Documentation</title>
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-hover: #4338CA;
+            --text-main: #1F2937;
+            --text-muted: #6B7280;
+            --bg-body: #F9FAFB;
+            --bg-sidebar: #FFFFFF;
+            --bg-code: #1E293B;
+            --border-color: #E5E7EB;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text-main);
+            background-color: var(--bg-body);
+            line-height: 1.6;
+            display: flex;
+        }
+
+        /* Sidebar Navigation */
+        aside {
+            width: 280px;
+            height: 100vh;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow-y: auto;
+            padding: 2rem 1.5rem;
+        }
+
+        aside h1 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        aside ul {
+            list-style: none;
+        }
+
+        aside ul li {
+            margin-bottom: 0.75rem;
+        }
+
+        aside ul li a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        aside ul li a:hover {
+            color: var(--primary);
+        }
+
+        aside ul ul {
+            margin-top: 0.5rem;
+            margin-left: 1rem;
+            font-size: 0.9rem;
+            border-left: 2px solid var(--border-color);
+            padding-left: 0.75rem;
+        }
+
+        /* Main Content */
+        main {
+            margin-left: 280px;
+            padding: 3rem 4rem;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        section {
+            margin-bottom: 4rem;
+            scroll-margin-top: 2rem;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        ul.content-list {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        ul.content-list li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Code Blocks */
+        pre {
+            background-color: var(--bg-code);
+            color: #E2E8F0;
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            margin-bottom: 1.5rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.9rem;
+        }
+
+        code {
+            font-family: inherit;
+        }
+
+        p code, li code {
+            background-color: #E2E8F0;
+            color: #B91C1C;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-size: 0.85em;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--bg-sidebar);
+            font-weight: 600;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body>
+
+    <aside>
+        <h1>🚀 Nova</h1>
+        <nav>
+            <ul>
+                <li><a href="#getting-started">Getting Started</a></li>
+                <li><a href="#directory-structure">Directory Structure</a></li>
+                <li><a href="#configuration">Configuration</a></li>
+                <li>
+                    <a href="#routing-controllers">Routing & Controllers</a>
+                    <ul>
+                        <li><a href="#defining-routes">Defining Routes</a></li>
+                        <li><a href="#controllers">Controllers</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#database-orm">Database & ORM</a>
+                    <ul>
+                        <li><a href="#models">Defining Models</a></li>
+                        <li><a href="#crud">CRUD Operations</a></li>
+                        <li><a href="#relationships">Relationships</a></li>
+                    </ul>
+                </li>
+                <li><a href="#cli-commands">CLI Commands</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main>
+        <section id="getting-started">
+            <h2>Getting Started</h2>
+            <p>Nova is a lightweight, zero-dependency MVC web framework for Python. It is designed to be fast, simple, and strictly structured, offering a modern developer experience without the bloat of heavy third-party libraries.</p>
+            
+            <h3>Prerequisites</h3>
+            <ul class="content-list">
+                <li>Python 3.8+</li>
+                <li>Built-in <code>sqlite3</code> (default driver)</li>
+                <li><em>Optional:</em> <code>pymysql</code> (for MySQL) or <code>psycopg2-binary</code> (for PostgreSQL)</li>
+            </ul>
+
+            <h3>Installation</h3>
+            <pre><code># 1. Clone your repository
+git clone https://github.com/yourusername/nova.git
+cd nova
+
+# 2. Setup your environment variables
+cp .env.example .env
+
+# 3. Start the development server
+python nova.py serve</code></pre>
+        </section>
+
+        <section id="directory-structure">
+            <h2>Directory Structure</h2>
+            <p>Nova enforces a strict, predictable MVC architecture to keep your code organized as it grows.</p>
+            <ul class="content-list">
+                <li><strong><code>app/</code></strong>: Your application code.
+                    <ul>
+                        <li><strong><code>Http/Controllers/</code></strong>: Houses your route controllers.</li>
+                        <li><strong><code>Models/</code></strong>: Your Nova-ORM database models.</li>
+                    </ul>
+                </li>
+                <li><strong><code>engine/</code></strong>: The core framework code (Routing, DB, ORM, Request/Response). <em>Do not modify.</em></li>
+                <li><strong><code>database/</code></strong>: Stores SQLite databases (if using the default driver).</li>
+                <li><strong><code>public/</code></strong>: The document root. Contains <code>index.py</code> (Front Controller) and static assets.</li>
+                <li><strong><code>resources/views/</code></strong>: Your HTML templates.</li>
+                <li><strong><code>routes/</code></strong>: Contains <code>web.py</code> where all HTTP routes are registered.</li>
+            </ul>
+        </section>
+
+        <section id="configuration">
+            <h2>Configuration</h2>
+            <p>Application configuration is handled via the <code>.env</code> file at the root of your project. The framework includes a custom dependency-free parser.</p>
+            <p>You can access these variables anywhere in your app using the <code>env</code> helper function:</p>
+            <pre><code>from engine.Support.env import env
+
+# Get a value, or provide a default if missing
+api_key = env('API_KEY', 'default_fallback_value')
+db_driver = env('DB_CONNECTION', 'sqlite')</code></pre>
+        </section>
+
+        <section id="routing-controllers">
+            <h2>Routing & Controllers</h2>
+            <p>Routes are registered in <code>routes/web.py</code>. Nova maps HTTP methods and URIs directly to Controller methods.</p>
+
+            <h3 id="defining-routes">Defining Routes</h3>
+            <pre><code># routes/web.py
+def register_routes(router):
+    router.get('/', 'HomeController@index')
+    router.post('/users', 'UserController@store')</code></pre>
+
+            <h3 id="controllers">Creating Controllers</h3>
+            <p>You can generate a controller quickly using the Nova CLI:</p>
+            <pre><code>python nova.py make:controller UserController</code></pre>
+            <p>Controllers receive a <code>Request</code> object and must return a <code>Response</code>.</p>
+            <pre><code># app/Http/Controllers/UserController.py
+from engine.Http.request import Request
+from engine.Http.response import Response
+
+class UserController:
+    def store(self, request: Request) -> Response:
+        name = request.post.get('name')
+        return Response(f"User {name} created!", 201)</code></pre>
+        </section>
+
+        <section id="database-orm">
+            <h2>Database & Nova-ORM</h2>
+            <p>Nova includes a powerful, zero-dependency Active Record implementation called <strong>Nova-ORM</strong>. It natively supports SQLite, MySQL, and PostgreSQL based on your <code>.env</code> configuration.</p>
+
+            <h3 id="models">Defining a Model</h3>
+            <p>Models live in <code>app/Models/</code>. By default, Nova assumes the table name is the plural, lowercase version of the class name.</p>
+            <pre><code>from engine.Database.model import Model
+
+class User(Model):
+    # Optional: override default table name
+    # __table__ = 'custom_users_table'
+    pass</code></pre>
+
+            <h3 id="crud">Basic CRUD Operations</h3>
+            <pre><code># Create
+user = User.create(name="Alice", email="alice@example.com")
+
+# Read
+users = User.all()            # Fetch all
+user = User.find(1)           # Fetch by PK
+admins = User.where('role', 'admin') # Filter
+
+# Update
+user = User.find(1)
+user.name = "Alice Nova"
+user.save()
+
+# Delete
+user = User.find(1)
+user.delete()</code></pre>
+
+            <h3 id="relationships">Relationships</h3>
+            <p>Nova-ORM supports <code>has_many</code> and <code>belongs_to</code> relationships for easy data retrieval.</p>
+            <pre><code># app/Models/User.py
+class User(Model):
+    def posts(self):
+        return self.has_many(Post)
+
+# app/Models/Post.py
+import app.Models.User as UserModule
+
+class Post(Model):
+    def author(self):
+        return self.belongs_to(UserModule.User)</code></pre>
+        </section>
+
+        <section id="cli-commands">
+            <h2>CLI Commands</h2>
+            <p>The <code>nova.py</code> file acts as your command-line assistant.</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Command</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>python nova.py serve</code></td>
+                        <td>Boots the WSGI server on the host/port defined in <code>.env</code>.</td>
+                    </tr>
+                    <tr>
+                        <td><code>python nova.py make:controller [Name]</code></td>
+                        <td>Scaffolds a new controller in <code>app/Http/Controllers/</code>.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+</body>
+</html>

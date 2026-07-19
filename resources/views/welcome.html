@@ -4,12 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome to Nova</title>
+    
+    <!-- Nova Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    
     <style>
         :root {
             --bg-color: #f8fafc;
             --text-main: #0f172a;
             --text-muted: #64748b;
-            --accent: #6366f1;
+            --accent: #3776AB; /* Adjusted to match Python/Nova Blue */
             --card-bg: #ffffff;
             --border: #e2e8f0;
         }
@@ -42,17 +46,16 @@
             display: inline-block;
             margin-bottom: 1.5rem;
             letter-spacing: 0.05em;
+            text-transform: uppercase;
         }
 
-        h1 {
-            font-size: 3rem;
-            font-weight: 800;
-            letter-spacing: -0.04em;
-            margin: 0 0 1rem 0;
+        .logo-container {
+            margin-bottom: 1.5rem;
         }
 
-        h1 span {
-            color: var(--accent);
+        .logo-container img {
+            height: 90px;
+            width: auto;
         }
 
         p {
@@ -85,13 +88,26 @@
             font-size: 0.85rem;
             color: var(--text-muted);
         }
+        
+        code {
+            background: var(--border);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: monospace;
+            color: var(--text-main);
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <!-- Dynamic replacement via your regex engine -->
-        <div class="badge">NOVA V{{ version }}</div>
-        <h1>🌌 Welcome to <span>Nova</span></h1>
+        <div class="badge">{{ framework_version }}</div>
+        
+        <!-- Nova Main Logo -->
+        <div class="logo-container">
+            <img src="/logo.svg" alt="Nova Framework Logo">
+        </div>
+
         <p>A lightweight, elegant Python web framework built on micro-component architecture, clean request lifecycles, and rapid developer agility.</p>
         
         <div class="links">
@@ -101,7 +117,7 @@
         </div>
 
         <footer>
-            Environment: <code style="background: var(--border); padding: 0.2rem 0.4rem; border-radius: 4px;">{{ environment }}</code>
+            Environment: <code>{{ env }}</code> &nbsp;|&nbsp; Python: <code>{{ python_version }}</code>
         </footer>
     </div>
 </body>
