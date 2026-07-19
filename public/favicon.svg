@@ -1,0 +1,24 @@
+<!-- public/favicon.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
+    <defs>
+        <!-- Python Blue to Deep Cosmic Dark Gradient -->
+        <linearGradient id="pythonBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#3776AB" />
+            <stop offset="100%" stop-color="#1F4263" />
+        </linearGradient>
+        <!-- Python Yellow Gradient -->
+        <linearGradient id="pythonYellow" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#FFD343" />
+            <stop offset="100%" stop-color="#D1A71B" />
+        </linearGradient>
+    </defs>
+    <!-- Background Circle -->
+    <circle cx="64" cy="64" r="60" fill="#0F172A" stroke="#1E293B" stroke-width="4"/>
+    
+    <!-- Stylized Nova / Python Interlocking "N" -->
+    <path d="M40 90 V38 L72 78" stroke="url(#pythonBlue)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+    <path d="M56 50 L88 90 V38" stroke="url(#pythonYellow)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+    
+    <!-- Central Nova Sparkle Star -->
+    <path d="M64 48 L66 62 L80 64 L66 66 L64 80 L62 66 L48 64 L62 62 Z" fill="#FFFFFF" />
+</svg>

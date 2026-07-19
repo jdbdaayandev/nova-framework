@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Nova</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --accent: #6366f1;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 600px;
+            padding: 2rem;
+        }
+
+        .badge {
+            background-color: #e0e7ff;
+            color: var(--accent);
+            padding: 0.35rem 0.85rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.05em;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            margin: 0 0 1rem 0;
+        }
+
+        h1 span {
+            color: var(--accent);
+        }
+
+        p {
+            font-size: 1.15rem;
+            line-height: 1.6;
+            color: var(--text-muted);
+            margin-bottom: 2.5rem;
+        }
+
+        .links {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+        }
+
+        .links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.2s ease;
+        }
+
+        .links a:hover {
+            color: var(--accent);
+        }
+
+        footer {
+            margin-top: 4rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Dynamic replacement via your regex engine -->
+        <div class="badge">NOVA V{{ version }}</div>
+        <h1>🌌 Welcome to <span>Nova</span></h1>
+        <p>A lightweight, elegant Python web framework built on micro-component architecture, clean request lifecycles, and rapid developer agility.</p>
+        
+        <div class="links">
+            <a href="https://github.com" target="_blank">Documentation</a>
+            <a href="#" onclick="alert('Nova CLI tools are up and running!')">CLI Status</a>
+            <a href="https://github.com" target="_blank">GitHub</a>
+        </div>
+
+        <footer>
+            Environment: <code style="background: var(--border); padding: 0.2rem 0.4rem; border-radius: 4px;">{{ environment }}</code>
+        </footer>
+    </div>
+</body>
+</html>
