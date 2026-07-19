@@ -3,17 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nova Framework Documentation</title>
+    <title>Nova Framework Complete Architecture Reference Manual</title>
     <style>
         :root {
             --primary: #4F46E5;
             --primary-hover: #4338CA;
+            --primary-light: #EEF2F6;
             --text-main: #1F2937;
-            --text-muted: #6B7280;
+            --text-muted: #4B5563;
             --bg-body: #F9FAFB;
             --bg-sidebar: #FFFFFF;
-            --bg-code: #1E293B;
+            --bg-code: #0F172A;
             --border-color: #E5E7EB;
+            --accent-green: #059669;
+            --accent-red: #DC2626;
+            --accent-amber: #D97706;
         }
 
         * {
@@ -26,13 +30,13 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             color: var(--text-main);
             background-color: var(--bg-body);
-            line-height: 1.6;
+            line-height: 1.7;
             display: flex;
         }
 
         /* Sidebar Navigation */
         aside {
-            width: 280px;
+            width: 320px;
             height: 100vh;
             background-color: var(--bg-sidebar);
             border-right: 1px solid var(--border-color);
@@ -40,16 +44,17 @@
             top: 0;
             left: 0;
             overflow-y: auto;
-            padding: 2rem 1.5rem;
+            padding: 2.5rem 1.5rem;
         }
 
         aside h1 {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             color: var(--primary);
             margin-bottom: 2rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            letter-spacing: -0.025em;
         }
 
         aside ul {
@@ -57,110 +62,161 @@
         }
 
         aside ul li {
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.85rem;
         }
 
         aside ul li a {
             text-decoration: none;
             color: var(--text-muted);
             font-weight: 500;
-            transition: color 0.2s;
+            font-size: 0.95rem;
+            transition: color 0.2s, padding-left 0.2s;
+            display: block;
         }
 
         aside ul li a:hover {
             color: var(--primary);
+            padding-left: 0.25rem;
         }
 
         aside ul ul {
             margin-top: 0.5rem;
-            margin-left: 1rem;
-            font-size: 0.9rem;
-            border-left: 2px solid var(--border-color);
-            padding-left: 0.75rem;
+            margin-left: 0.75rem;
+            font-size: 0.875rem;
+            border-left: 1px solid var(--border-color);
+            padding-left: 1rem;
         }
 
-        /* Main Content */
+        aside ul ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Main Content Grid */
         main {
-            margin-left: 280px;
-            padding: 3rem 4rem;
-            max-width: 900px;
+            margin-left: 320px;
+            padding: 4rem 5rem;
+            max-width: 1100px;
             width: 100%;
         }
 
         section {
-            margin-bottom: 4rem;
-            scroll-margin-top: 2rem;
+            margin-bottom: 5rem;
+            scroll-margin-top: 3rem;
         }
 
         h2 {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid var(--border-color);
+            font-size: 2.25rem;
+            color: #111827;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--border-color);
+            letter-spacing: -0.03em;
         }
 
         h3 {
-            font-size: 1.25rem;
-            margin-top: 2rem;
+            font-size: 1.4rem;
+            margin-top: 2.5rem;
             margin-bottom: 1rem;
-            color: var(--text-main);
+            color: #1F2937;
+            letter-spacing: -0.02em;
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #374151;
         }
 
         p {
-            margin-bottom: 1rem;
+            margin-bottom: 1.25rem;
             color: var(--text-muted);
         }
 
+        .alert {
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+        
+        .alert-warning {
+            background-color: #FEF3C7;
+            border-left-color: var(--accent-amber);
+            color: #92400E;
+        }
+        
+        .alert-warning p {
+            color: #92400E;
+            margin-bottom: 0;
+        }
+
         ul.content-list {
-            margin-left: 1.5rem;
-            margin-bottom: 1rem;
+            margin-left: 1.75rem;
+            margin-bottom: 1.5rem;
             color: var(--text-muted);
         }
 
         ul.content-list li {
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.65rem;
         }
 
-        /* Code Blocks */
+        /* Code Block Design */
         pre {
             background-color: var(--bg-code);
-            color: #E2E8F0;
-            padding: 1.25rem;
-            border-radius: 0.5rem;
+            color: #F8FAFC;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
             overflow-x: auto;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.75rem;
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-            font-size: 0.9rem;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
         }
 
         code {
             font-family: inherit;
         }
 
-        p code, li code {
-            background-color: #E2E8F0;
-            color: #B91C1C;
-            padding: 0.2rem 0.4rem;
-            border-radius: 0.25rem;
-            font-size: 0.85em;
+        p code, li code, td code {
+            background-color: #F1F5F9;
+            color: var(--accent-red);
+            padding: 0.15rem 0.4rem;
+            border-radius: 0.375rem;
+            font-size: 0.875em;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
         }
 
-        /* Tables */
+        /* Tables styling */
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
+            margin-top: 1rem;
+            background-color: #FFFFFF;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border-radius: 0.5rem;
+            overflow: hidden;
         }
 
         th, td {
             text-align: left;
-            padding: 0.75rem;
+            padding: 1rem 1.25rem;
             border-bottom: 1px solid var(--border-color);
+            font-size: 0.925rem;
         }
 
         th {
-            background-color: var(--bg-sidebar);
+            background-color: #F8FAFC;
             font-weight: 600;
+            color: #334155;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
         }
 
         html {
@@ -171,173 +227,348 @@
 <body>
 
     <aside>
-        <h1>🚀 Nova</h1>
+        <h1>🌌 Nova Engine Architecture</h1>
         <nav>
             <ul>
-                <li><a href="#getting-started">Getting Started</a></li>
-                <li><a href="#directory-structure">Directory Structure</a></li>
-                <li><a href="#configuration">Configuration</a></li>
-                <li>
-                    <a href="#routing-controllers">Routing & Controllers</a>
+                <li><a href="#architectural-overview">1. Core Design Philosophy</a></li>
+                <li><a href="#front-controller">2. Front Controller Subsystem</a>
                     <ul>
-                        <li><a href="#defining-routes">Defining Routes</a></li>
-                        <li><a href="#controllers">Controllers</a></li>
+                        <li><a href="#wsgi-lifecycle">WSGI Request Routing</a></li>
+                        <li><a href="#static-serving">Secure Static Streaming</a></li>
+                        <li><a href="#intercept-layers">Unthrown Error Interception</a></li>
                     </ul>
                 </li>
-                <li>
-                    <a href="#database-orm">Database & ORM</a>
+                <li><a href="#configuration">3. Environment Engine</a>
                     <ul>
-                        <li><a href="#models">Defining Models</a></li>
-                        <li><a href="#crud">CRUD Operations</a></li>
-                        <li><a href="#relationships">Relationships</a></li>
+                        <li><a href="#tokenization">Tokenization & Cleaning</a></li>
+                        <li><a href="#interpolation-deep">Nested Variables Loop</a></li>
+                        <li><a href="#primitive-casting">Primitive Type Mapping</a></li>
                     </ul>
                 </li>
-                <li><a href="#cli-commands">CLI Commands</a></li>
+                <li><a href="#error-handling">4. Diagnostics & Error Subsystem</a>
+                    <ul>
+                        <li><a href="#security-fencing">Environment Boundaries</a></li>
+                        <li><a href="#reflection-deep">Trace Reflection Parser</a></li>
+                        <li><a href="#dynamic-views">Runtime Dashboard Matrix</a></li>
+                    </ul>
+                </li>
+                <li><a href="#routing-controllers">5. HTTP Routing & Actions</a>
+                    <ul>
+                        <li><a href="#trie-compilation">Route Mapping Mechanics</a></li>
+                        <li><a href="#di-container">Dependency Injection Boot</a></li>
+                        <li><a href="#controllers-deep">Action Context Execution</a></li>
+                    </ul>
+                </li>
+                <li><a href="#database-orm">6. Database & Nova-ORM</a>
+                    <ul>
+                        <li><a href="#active-record">Active Record Blueprint</a></li>
+                        <li><a href="#dynamic-props">Field Shadow Mapping</a></li>
+                        <li><a href="#relationships-deep">Lazy Relational Pipelines</a></li>
+                    </ul>
+                </li>
+                <li><a href="#cli-commands">7. CLI Core Infrastructure</a></li>
             </ul>
         </nav>
     </aside>
 
     <main>
-        <section id="getting-started">
-            <h2>Getting Started</h2>
-            <p>Nova is a lightweight, zero-dependency MVC web framework for Python. It is designed to be fast, simple, and strictly structured, offering a modern developer experience without the bloat of heavy third-party libraries.</p>
+        <section id="architectural-overview">
+            <h2>1. Core Design Philosophy</h2>
+            <p>Nova is engineered as a modern, strict Model-View-Controller (MVC) system characterized by a <strong>zero-dependency footprint</strong>. It abstracts native Web Server Gateway Interface (WSGI) protocols, raw SQL operations, runtime reflection diagnostics, and structural type interpolation entirely into cleanly decoupled components inside the <code>engine/</code> architecture directory.</p>
             
-            <h3>Prerequisites</h3>
-            <ul class="content-list">
-                <li>Python 3.8+</li>
-                <li>Built-in <code>sqlite3</code> (default driver)</li>
-                <li><em>Optional:</em> <code>pymysql</code> (for MySQL) or <code>psycopg2-binary</code> (for PostgreSQL)</li>
-            </ul>
+            <div class="alert">
+                <strong>Architectural Invariant:</strong> No framework files inside <code>engine/</code> may import third-party packages or modules outside the Python Standard Library. This guarantees that Nova retains consistent operational integrity, eliminates configuration overhead, and guarantees predictable execution times.
+            </div>
 
-            <h3>Installation</h3>
-            <pre><code># 1. Clone your repository
-git clone https://github.com/yourusername/nova.git
-cd nova
-
-# 2. Setup your environment variables
-cp .env.example .env
-
-# 3. Start the development server
-python nova.py serve</code></pre>
+            <h3>Core Subsystem Interdependencies</h3>
+            <p>The system execution relies on explicit execution barriers. Configuration properties load prior to any application file parsing, shielding the application lifecycle against runtime race conditions:</p>
+            <pre><code>[Runtime Boot Initialization Sequence]
+1. Python Interpreter initializes public/index.py
+2. engine.Support.env reads and locks internal environment states
+3. bootstrap.app reads configurations and registers the DI Container instances
+4. engine.Exceptions.handler mounts defensive globally-accessible diagnostic structures
+5. WSGI layer binds connection profiles and enters the listening loop</code></pre>
         </section>
 
-        <section id="directory-structure">
-            <h2>Directory Structure</h2>
-            <p>Nova enforces a strict, predictable MVC architecture to keep your code organized as it grows.</p>
-            <ul class="content-list">
-                <li><strong><code>app/</code></strong>: Your application code.
-                    <ul>
-                        <li><strong><code>Http/Controllers/</code></strong>: Houses your route controllers.</li>
-                        <li><strong><code>Models/</code></strong>: Your Nova-ORM database models.</li>
-                    </ul>
-                </li>
-                <li><strong><code>engine/</code></strong>: The core framework code (Routing, DB, ORM, Request/Response). <em>Do not modify.</em></li>
-                <li><strong><code>database/</code></strong>: Stores SQLite databases (if using the default driver).</li>
-                <li><strong><code>public/</code></strong>: The document root. Contains <code>index.py</code> (Front Controller) and static assets.</li>
-                <li><strong><code>resources/views/</code></strong>: Your HTML templates.</li>
-                <li><strong><code>routes/</code></strong>: Contains <code>web.py</code> where all HTTP routes are registered.</li>
-            </ul>
+        <section id="front-controller">
+            <h2>2. Front Controller Subsystem</h2>
+            <p>Every inbound HTTP request routes explicitly through the primary entry node located at <code>public/index.py</code>. This file configures absolute routing execution paths, bypasses framework engines for local asset targets, dynamically addresses structural components, and resolves downstream output types into reliable arrays matching strict WSGI conventions.</p>
+
+            <h3 id="wsgi-lifecycle">WSGI Request Routing</h3>
+            <p>The execution gateway maps state settings directly out of the incoming WSGI environment dictionary, converting parameters cleanly before injecting contexts downward:</p>
+            <pre><code>def application(environ, start_response):
+    # Establish base execution constraints
+    path_info = environ.get('PATH_INFO', '/')
+
+    # 1. Static Asset Validation and Direct Core Interception
+    static_response = serve_static(path_info, start_response)
+    if static_response is not None:
+        return static_response
+
+    # 2. Application Context Pipeline Execution
+    try:
+        request = Request(environ)
+        router = app.make('router')
+        
+        if hasattr(router, 'dispatch'):
+            response = router.dispatch(request)
+        else:
+            response = router.handle(request)
+            
+        # Intercept valid responses carrying non-200 status codes
+        response = ErrorHandler.handle_error_response(response)
+            
+    except Exception as e:
+        # Route runtime engine faults safely to visual diagnostics
+        response = ErrorHandler.handle_exception(e)
+
+    # 3. Standardization and Serialization of HTTP Headers
+    headers = list(response.headers.items()) if isinstance(response.headers, dict) else response.headers
+    status_line = getattr(response, 'status_string', f"{getattr(response, 'status', 200)} OK")
+    
+    start_response(status_line, headers)
+    
+    if isinstance(response.content, bytes):
+        return [response.content]
+    return [str(response.content).encode('utf-8')]</code></pre>
+
+            <h3 id="static-serving">Secure Static Streaming</h3>
+            <p>The static asset serving routine intercepts requests pointing to local assets inside the <code>public/</code> folder layout without loading framework routing layers. To preserve runtime containment boundaries, the engine locks execution logic out of directory indexes and script components:</p>
+            <pre><code>def serve_static(path_info, start_response):
+    # Isolate absolute lookup coordinates
+    file_path = os.path.join(PUBLIC_DIR, path_info.lstrip('/'))
+
+    # Security Constraint: Confirm file target exists and isolate source code files
+    if os.path.isfile(file_path) and not file_path.endswith('.py'):
+        mime_type, _ = mimetypes.guess_type(file_path)
+        content_type = mime_type or 'application/octet-stream'
+        
+        try:
+            with open(file_path, 'rb') as asset:
+                content = asset.read()
+            start_response('200 OK', [('Content-Type', content_type), ('Content-Length', str(len(content)))])
+            return [content]
+        except IOError:
+            return None
+    return None</code></pre>
+
+            <h3 id="intercept-layers">Unthrown Error Interception</h3>
+            <p>When controllers explicitly return an error status code rather than throwing a native Python exception (e.g., <code>return Response("Access Denied", status=403)</code>), the front controller passes the target response through <code>ErrorHandler.handle_error_response()</code>. This converts generic responses into the signature visual framework theme automatically before outputting the stream.</p>
         </section>
 
         <section id="configuration">
-            <h2>Configuration</h2>
-            <p>Application configuration is handled via the <code>.env</code> file at the root of your project. The framework includes a custom dependency-free parser.</p>
-            <p>You can access these variables anywhere in your app using the <code>env</code> helper function:</p>
-            <pre><code>from engine.Support.env import env
+            <h2>3. Environment Engine</h2>
+            <p>The architecture isolates environment processing within a custom utility script at <code>engine/Support/env.py</code>. This system reads <code>.env</code> file formats, parses values, runs variable token replacements, cleans out trailing code commentaries, and casts variable states into programmatic primitives.</p>
 
-# Get a value, or provide a default if missing
-api_key = env('API_KEY', 'default_fallback_value')
-db_driver = env('DB_CONNECTION', 'sqlite')</code></pre>
-        </section>
+            <h3 id="tokenization">Tokenization & Cleaning</h3>
+            <p>Lines are parsed iteratively to skip blank elements and structure key-value maps. The parser tracks syntax quotes closely to strip out trailing descriptive comments safely without corrupting value strings containing hashes:</p>
+            <pre><code># Correctly handled comment formats:
+APP_KEY="secret_#123_hash"     # Preserves internal hash string value
+DB_PORT=3306                   # Trailing comments are stripped cleanly</code></pre>
 
-        <section id="routing-controllers">
-            <h2>Routing & Controllers</h2>
-            <p>Routes are registered in <code>routes/web.py</code>. Nova maps HTTP methods and URIs directly to Controller methods.</p>
+            <h3 id="interpolation-deep">Nested Variables Loop</h3>
+            <p>The configuration layer runs multi-pass variable extraction loops to evaluate nested declarations denoted by <code>${TARGET_KEY}</code> syntax formats. The substitution loop processes settings sequentially up to a maximum stack depth of 3 layers to prevent recursive loops:</p>
+            <pre><code>def load_env(filepath):
+    raw_mappings = {}
+    
+    # 1. Parse lines and clean inline entries
+    with open(filepath, 'r') as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+            if '=' in line:
+                key, val = line.split('=', 1)
+                raw_mappings[key.strip()] = val.strip().strip('"\'')
 
-            <h3 id="defining-routes">Defining Routes</h3>
-            <pre><code># routes/web.py
-def register_routes(router):
-    router.get('/', 'HomeController@index')
-    router.post('/users', 'UserController@store')</code></pre>
+    # 2. Multi-pass substitution loop (Max 3 tiers deep)
+    for _ in range(3):
+        for key, value in raw_mappings.items():
+            if '${' in value:
+                # Target and replace variables matching tokens
+                for target_key in raw_mappings.keys():
+                    token = f"${{{target_key}}}"
+                    if token in value:
+                        value = value.replace(token, raw_mappings[target_key])
+                raw_mappings[key] = value
 
-            <h3 id="controllers">Creating Controllers</h3>
-            <p>You can generate a controller quickly using the Nova CLI:</p>
-            <pre><code>python nova.py make:controller UserController</code></pre>
-            <p>Controllers receive a <code>Request</code> object and must return a <code>Response</code>.</p>
-            <pre><code># app/Http/Controllers/UserController.py
-from engine.Http.request import Request
-from engine.Http.response import Response
+    # 3. Commit clean parsed data records directly to system environment records
+    for key, value in raw_mappings.items():
+        os.environ[key] = value</code></pre>
 
-class UserController:
-    def store(self, request: Request) -> Response:
-        name = request.post.get('name')
-        return Response(f"User {name} created!", 201)</code></pre>
-        </section>
-
-        <section id="database-orm">
-            <h2>Database & Nova-ORM</h2>
-            <p>Nova includes a powerful, zero-dependency Active Record implementation called <strong>Nova-ORM</strong>. It natively supports SQLite, MySQL, and PostgreSQL based on your <code>.env</code> configuration.</p>
-
-            <h3 id="models">Defining a Model</h3>
-            <p>Models live in <code>app/Models/</code>. By default, Nova assumes the table name is the plural, lowercase version of the class name.</p>
-            <pre><code>from engine.Database.model import Model
-
-class User(Model):
-    # Optional: override default table name
-    # __table__ = 'custom_users_table'
-    pass</code></pre>
-
-            <h3 id="crud">Basic CRUD Operations</h3>
-            <pre><code># Create
-user = User.create(name="Alice", email="alice@example.com")
-
-# Read
-users = User.all()            # Fetch all
-user = User.find(1)           # Fetch by PK
-admins = User.where('role', 'admin') # Filter
-
-# Update
-user = User.find(1)
-user.name = "Alice Nova"
-user.save()
-
-# Delete
-user = User.find(1)
-user.delete()</code></pre>
-
-            <h3 id="relationships">Relationships</h3>
-            <p>Nova-ORM supports <code>has_many</code> and <code>belongs_to</code> relationships for easy data retrieval.</p>
-            <pre><code># app/Models/User.py
-class User(Model):
-    def posts(self):
-        return self.has_many(Post)
-
-# app/Models/Post.py
-import app.Models.User as UserModule
-
-class Post(Model):
-    def author(self):
-        return self.belongs_to(UserModule.User)</code></pre>
-        </section>
-
-        <section id="cli-commands">
-            <h2>CLI Commands</h2>
-            <p>The <code>nova.py</code> file acts as your command-line assistant.</p>
+            <h3 id="primitive-casting">Primitive Type Mapping</h3>
+            <p>The <code>env(key, default)</code> convenience method automatically checks string declarations and casts match targets into native language types:</p>
             <table>
                 <thead>
                     <tr>
-                        <th>Command</th>
-                        <th>Description</th>
+                        <th>Raw Configuration Value Mapping</th>
+                        <th>Evaluated Python Type Constant</th>
+                        <th>Operational Advantage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>"true"</code> / <code>"TRUE"</code></td>
+                        <td><code>True</code> (Boolean)</td>
+                        <td>Simplifies flags like <code>env('APP_DEBUG')</code> directly into logical statement checks.</td>
+                    </tr>
+                    <tr>
+                        <td><code>"false"</code> / <code>"FALSE"</code></td>
+                        <td><code>False</code> (Boolean)</td>
+                        <td>Prevents truthy evaluations of literal string statements.</td>
+                    </tr>
+                    <tr>
+                        <td><code>"null"</code> / <code>"NULL"</code> / <code>"none"</code></td>
+                        <td><code>None</code> (NoneType)</td>
+                        <td>Passes explicit nullable indicators clean into optional connection parameters.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="error-handling">
+            <h2>4. Diagnostics & Error Subsystem</h2>
+            <p>Centralized error management is encapsulated entirely inside <code>engine/Exceptions/handler.py</code>. This module isolates execution failures, parses traceback metadata fields via low-level reflection routines, and structuralizes error readouts based on current security settings.</p>
+
+            <h3 id="security-fencing">Environment Boundaries</h3>
+            <div class="alert alert-warning">
+                <strong>Critical Security Rule:</strong> The diagnostic dashboard leaks private configuration strings, system folders, and database structures. The property <code>APP_ENV=production</code> must be declared on live systems to restrict access to sensitive internal telemetry.
+            </div>
+            <ul class="content-list">
+                <li><strong>Development Mode:</strong> Halts thread execution loops immediately upon catching error states to compile a detailed visual trace UI replete with contextual file paths and descriptive debugger resolution guidelines.</li>
+                <li><strong>Production Mode:</strong> Intercepts stack exceptions cleanly and renders a generic response screen matching standard HTTP status lines (e.g., <code>500 Internal Server Error</code>), keeping the underlying system code invisible to external users.</li>
+            </ul>
+
+            <h3 id="reflection-deep">Trace Reflection Parser</h3>
+            <p>The reflection routine inspects core system exceptions during failures, matching stack error message strings against framework-specific patterns to generate helpful developer hints:</p>
+            <pre><code>@classmethod
+def _diagnose_issue(cls, exception):
+    error_msg = str(exception)
+    exc_type = type(exception).__name__
+    
+    # Context diagnosis match for missing controller properties
+    if "has no attribute" in error_msg and "Controller" in exc_type:
+        method_name = error_msg.split("'")[-2] if "'" in error_msg else "unknown"
+        return {
+            "title": "Missing Action Target",
+            "hint": f"Your routed controller is missing the action method: &lt;code&gt;{method_name}&lt;/code&gt;.",
+            "snippet": f"def {method_name}(self, request):\n    return Response('Hello from {method_name}')"
+        }
+        
+    # Context diagnosis match for unresolvable controller import files
+    if "No module named" in error_msg and "Controllers" in error_msg:
+        module_name = error_msg.split("'")[-2] if "'" in error_msg else "unknown"
+        return {
+            "title": "Controller Module Resolution Fault",
+            "hint": f"The routing layer cannot load module: &lt;code&gt;{module_name}&lt;/code&gt;.",
+            "snippet": f"# Ensure file exists: app/Http/Controllers/{module_name.split('.')[-1]}.py"
+        }
+        
+    return None</code></pre>
+
+            <h3 id="dynamic-views">Runtime Dashboard Matrix</h3>
+            <p>The system builds its visual diagnostic screens dynamically using low-level string manipulation, avoiding file dependencies to ensure the error handler can render an error screen even if the file system is failing. It outputs a modern layout styled with embedded inline styles matching the application signature system theme color configurations.</p>
+        </section>
+
+        <section id="routing-controllers">
+            <h2>5. HTTP Routing & Actions</h2>
+            <p>The router handles request mapping by parsing string configurations registered inside <code>routes/web.py</code>, tracking application route properties, resolving controller routes dynamically, and supplying necessary request parameters down into class methods.</p>
+
+            <h3 id="trie-compilation">Route Mapping Mechanics</h3>
+            <p>Routes are compiled into structured dictionaries ordered by HTTP verbs. Variable parameters denoted within paths by colon prefixes (e.g., <code>/users/:id</code>) are extracted and converted into runtime regular expressions to simplify dynamic variable parsing:</p>
+            <pre><code># Internal structural mapping translation:
+# Path pattern '/posts/:id/comments/:comment_id' compiles down into:
+# Regex pattern: ^/posts/(?P&lt;id&gt;[^/]+)/comments/(?P&lt;comment_id&gt;[^/]+)$</code></pre>
+
+            <h3 id="di-container">Dependency Injection Boot</h3>
+            <p>The framework instantiates core application singletons via the container initialization routine defined inside <code>bootstrap/app.py</code>. This container registers system services and passes dependencies cleanly down into downstream controllers via factory injection strategies:</p>
+            <pre><code>from engine.Routing.router import Router
+from engine.Container.container import Container
+
+def create_app():
+    container = Container.getInstance()
+    
+    # Bind singletons into global shared execution states
+    container.singleton('router', lambda c: Router())
+    
+    # Load application route entries automatically
+    import routes.web as web_routes
+    web_routes.register_routes(container.make('router'))
+    
+    return container</code></pre>
+
+            <h3 id="controllers-deep">Action Context Execution</h3>
+            <p>When matching execution hooks, the router splits string action mappings on the <code>@</code> separator token to resolve the target controller and method. It then instantiates the controller class dynamically via reflection and executes the target method:</p>
+            <pre><code># Route definition rule
+router.get('/profile', 'UserProfileController@show')
+
+# Processing step breakdown inside engine/Routing/router.py
+module_name = "app.Http.Controllers.UserProfileController"
+controller_module = __import__(module_name, fromlist=["UserProfileController"])
+controller_class = getattr(controller_module, "UserProfileController")
+
+instance = controller_class()
+action_method = getattr(instance, "show")
+response = action_method(request, **captured_parameters)</code></pre>
+        </section>
+
+        <section id="database-orm">
+            <h2>6. Database & Nova-ORM</h2>
+            <p>Nova-ORM is an implementation of the <strong>Active Record Pattern</strong> built completely on top of native database driver structures. It maps rows directly into instantiated model classes, formats fluent relational pipelines, and coordinates driver connection states.</p>
+
+            <h3 id="active-record">Active Record Blueprint</h3>
+            <p>Models extend the foundational class <code>engine.Database.model.Model</code>. By default, the framework handles table resolution automatically by analyzing class names to pluralize and format them as lowercase strings:</p>
+            <pre><code>from engine.Database.model import Model
+
+class FlightBooking(Model):
+    # Resolves automatically to the underlying table name: 'flight_bookings'
+    # Primary key tracking falls back to 'id' unless overriden explicitly
+    pass</code></pre>
+
+            <h3 id="dynamic-props">Field Shadow Mapping</h3>
+            <p>Database table structures are loaded via table reflection queries during execution, mapping database fields directly into internal class properties via Python's magic <code>__setattr__</code> and <code>__getattr__</code> methods. This lets developers query and modify model fields dynamically without having to explicitly declare column schemas within the codebase:</p>
+            <pre><code># Dynamic column interaction sample:
+flight = FlightBooking.find(42)
+flight.status = "Delayed"   # __setattr__ captures and queues data updates
+flight.save()               # Compiles update statements cleanly out to driver channels</code></pre>
+
+            <h3 id="relationships-deep">Lazy Relational Pipelines</h3>
+            <p>Relational queries use lazy evaluation patterns to prevent unnecessary resource consumption. Relationship methods compile and return deferred query builders rather than executing full database operations immediately:</p>
+            <pre><code># app/Models/User.py
+class User(Model):
+    def logs(self):
+        # Establishes a formal HasMany relational pipeline
+        return self.has_many(ActivityLog, foreign_key='user_id')
+
+# Query Execution Flow
+user = User.find(1)
+# Accessing relationship methods lazily builds down underlying SQL statements:
+# "SELECT * FROM activity_logs WHERE user_id = ?"
+user_logs = user.logs().where('severity', 'critical').get()</code></pre>
+        </section>
+
+        <section id="cli-commands">
+            <h2>7. CLI Core Infrastructure</h2>
+            <p>The terminal utility gateway <code>nova.py</code> simplifies development workflows by exposing quick commands to spin up servers, bootstrap environment modules, and scaffold application components.</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Terminal Operational Call Signature</th>
+                        <th>Internal Core Infrastructure Impact</th>
+                        <th>Expected Results & Artifact Outputs</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td><code>python nova.py serve</code></td>
-                        <td>Boots the WSGI server on the host/port defined in <code>.env</code>.</td>
+                        <td>Initializes the internal <code>load_env()</code> engine sequence and passes configurations down to build a standard Python multi-threaded <code>wsgiref.simple_server</code> listener.</td>
+                        <td>Binds and boots a development web server on the local host address and port configurations defined inside the <code>.env</code> file.</td>
                     </tr>
                     <tr>
                         <td><code>python nova.py make:controller [Name]</code></td>
-                        <td>Scaffolds a new controller in <code>app/Http/Controllers/</code>.</td>
+                        <td>Reads the target controller path argument, checks the destination path folder locations, and generates a structured controller boilerplate.</td>
+                        <td>Generates a clean class file stub within the <code>app/Http/Controllers/</code> directory, complete with pre-configured request and response imports.</td>
                     </tr>
                 </tbody>
             </table>

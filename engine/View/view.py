@@ -2,11 +2,12 @@
 import os
 import re
 from engine.Http.response import Response
+from engine.Support.helpers import asset  # <-- Import the asset helper
 
 def view(template_name: str, data: dict = None) -> Response:
     """
     Renders an HTML template using pure Python (Zero Dependencies).
-    Supports {{ variable }} syntax.
+    Supports {{ variable }} syntax and {{ asset('path') }} function calls.
     """
     if data is None:
         data = {}
@@ -23,7 +24,15 @@ def view(template_name: str, data: dict = None) -> Response:
     with open(template_path, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    # Regex function to find and replace {{ variable }} with actual data
+    # 1. Parse asset() helper functions specifically
+    def evaluate_asset(match):
+        path = match.group(1)
+        return asset(path)
+
+    # Matches {{ asset('path') }} or {{ asset("path") }}
+    content = re.sub(r'\{\{\s*asset\([\'"]([^\'"]+)[\'"]\)\s*\}\}', evaluate_asset, content)
+
+    # 2. Regex function to find and replace {{ variable }} with actual data
     def replace_placeholder(match):
         variable_name = match.group(1).strip()
         # Returns the value if found, otherwise leaves it empty

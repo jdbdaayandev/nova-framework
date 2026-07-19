@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome to Nova</title>
     
-    <!-- Nova Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <!-- Nova Favicon routed through the asset helper -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     
     <style>
         :root {
@@ -45,6 +45,7 @@
             font-weight: 600;
             display: inline-block;
             margin-bottom: 1.5rem;
+            line-height: 1;
             letter-spacing: 0.05em;
             text-transform: uppercase;
         }
@@ -103,9 +104,9 @@
         <!-- Dynamic replacement via your regex engine -->
         <div class="badge">{{ framework_version }}</div>
         
-        <!-- Nova Main Logo -->
+        <!-- Nova Main Logo routed through the asset helper -->
         <div class="logo-container">
-            <img src="/logo.svg" alt="Nova Framework Logo">
+            <img src="{{ asset('logo.svg') }}" alt="Nova Framework Logo">
         </div>
 
         <p>A lightweight, elegant Python web framework built on micro-component architecture, clean request lifecycles, and rapid developer agility.</p>

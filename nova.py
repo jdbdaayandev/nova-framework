@@ -6,8 +6,8 @@ import os
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 # Boot application context and configurations
-from engine.Support.env import load_env
-load_env()
+from engine.Support.env import load_env, env
+load_env('.env')
 
 # Import core consoles and migrators
 from engine.Database.migration import Migrator
