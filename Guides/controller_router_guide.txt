@@ -1,0 +1,187 @@
+==========================================================================
+   NOVA FRAMEWORK DEVELOPER MANUAL: ROUTING & CONTROLLER ARCHITECTURE
+==========================================================================
+
+This document defines the architectural patterns, request lifecycle trace, 
+and implementation guidelines for Nova's zero-dependency Routing Engine 
+and Core Base Controller.
+
+--------------------------------------------------------------------------
+1. ARCHITECTURAL OVERVIEW & LIFECYCLE PIPELINE
+--------------------------------------------------------------------------
+
+Nova uses an Inversion of Control (IoC) Pipeline execution layer embedded 
+directly within the routing runtime. This design allows the framework to 
+run global and route-specific middleware without touching the primary 
+WSGI Front Controller (`public/index.py`).
+
+The visual execution matrix flows as follows:
+
+  [Incoming HTTP Request]
+            │
+            ▼
+   public/index.py ──────────► Invokes router.dispatch(request)
+            │
+            ▼
+   engine/Routing/Router.py
+            │
+            ├─► 1. Intercepts `/public/` asset requests (streams binary)
+            │
+            └─► 2. Resolves route & compiles Middleware Stack:
+                   │
+                   ├──► Global Stack (e.g., StartSession)
+                   └──► Controller Stack (Filtered via 'only'/'except')
+            │
+            ▼
+   ┌────────────────────────────────────────────────────────┐
+   │             MIDDLEWARE ONION PIPELINE ENGINE           │
+   │                                                        │
+   │  [Outer Layer] Global Middleware (StartSession)       │
+   │     └── [Inner Layer] Scoped Middleware (Authenticate) │
+   │            └── [Core Destination] Controller Method    │
+   └────────────────────────────────────────────────────────┘
+            │
+            ▼
+   [Controller Action Returns Response Object]
+            │
+            ▼
+   [Binary Pipeline Emission back to public/index.py]
+
+
+--------------------------------------------------------------------------
+2. THE CORE ROUTING ENGINE (engine/Routing/Router.py)
+--------------------------------------------------------------------------
+
+The Router maps incoming HTTP verbs, URI string targets, and processes 
+dynamic payloads using four core architectural functions:
+
+* Mimetypes & Stream Interception: 
+  Intercepts standard GET paths pointing directly to `/public/*`, runs an 
+  os.path-based boundary security scan to block directory traversal 
+  attacks, and returns a binary stream response before parsing dynamic controllers.
+
+* Multi-Verb Method Mapping: 
+  Exposes structural mapping endpoints (`.get()`, `.post()`, `.put()`, 
+  `.delete()`) registering routes directly into isolated key-value dictionaries.
+
+* Parameter Inspection Engine:
+  Uses Python's native `inspect.signature` mirror array to automatically 
+  determine if the destination controller action demands the incoming 
+  Request object instance, dynamically preparing arguments safely.
+
+* Onion-Layer Pipeline Composer:
+  Wraps the final target endpoint execution array within nested functional 
+  closures. Each middleware layer accepts the Request and a trailing 
+  executable `next_layer` pointer to pass control down the stack.
+
+
+--------------------------------------------------------------------------
+3. THE CORE CONTROLLER MODULE (engine/Http/Controller.py)
+--------------------------------------------------------------------------
+
+Every custom application-level controller must extend the foundational base 
+Controller class. It implements conditional execution filter arrays.
+
+Key Methods & Properties:
+* `self.middleware(name, only=None, except_methods=None)`
+  Invoked exclusively within the `__init__` constructor of custom child 
+  controllers. Registers a string alias reference onto the controller.
+
+* Conditional Scoping Array:
+  - `only`: Array of string method names. The middleware will run *only* on these.
+  - `except_methods`: Array of string method names. The middleware runs on all *except* these.
+
+* `get_middleware_for_method(method_name)`
+  Invoked internally by the Router during execution tracing. Evaluates 
+  scoping rules and builds a list of active middleware aliases.
+
+
+--------------------------------------------------------------------------
+4. DEVELOPER IMPLEMENTATION WALKTHROUGH
+# ==========================================================================
+# STEP A: REGISTERING THE ROUTES (routes/web.py)
+# ==========================================================================
+from engine.Routing.Router import Router
+from app.Http.Controllers.DashboardController import DashboardController
+from app.Http.Controllers.AuthController import AuthController
+
+router = Router(app) # Fed out of IoC service boot sequences
+
+# Pass target mappings as an explicit (ControllerClass, 'method_string') Tuple:
+router.get('/', (DashboardController, 'index'))
+router.get('/dashboard', (DashboardController, 'panel'))
+router.get('/login', (AuthController, 'show_login'))
+router.post('/login', (AuthController, 'authenticate'))
+
+
+# ==========================================================================
+# STEP B: CREATING THE APPLICATION MIDDLEWARE LAYER
+# ==========================================================================
+# File Location: app/Http/Middleware/Authenticate.py
+from typing import Callable
+from engine.Http.request import Request
+from engine.Http.response import Response
+
+class Authenticate:
+    def __init__(self, session=None) -> None:
+        self.session = session
+
+    def handle(self, request: Request, next_layer: Callable[[Request], Response]) -> Response:
+        """
+        Intercepts and validates security criteria.
+        """
+        # Global session middleware booted first, guaranteeing session state exists!
+        if not request.session.has('user_id'):
+            # Stop the pipeline execution thread and issue an immediate redirect
+            return Response("Unauthorized - Please Login First", status=401)
+            
+        # Security criteria fulfilled, advance execution down the pipeline
+        return next_layer(request)
+
+
+# ==========================================================================
+# STEP C: CREATING THE APPLICATION CONTROLLER
+# ==========================================================================
+# File Location: app/Http/Controllers/DashboardController.py
+from engine.Http.Controller import Controller
+from engine.Http.request import Request
+from engine.Http.response import Response
+
+class DashboardController(Controller):
+
+    def __init__(self) -> None:
+        super().__init__()
+        
+        # Lock down the 'panel' action exclusively using the 'auth' alias.
+        # The 'index' method remains completely public.
+        self.middleware('auth', only=['panel'])
+
+    def index(self) -> Response:
+        """Publicly accessible splash page (doesn't require request parsing)."""
+        return Response("<h1>Welcome to Nova Framework Public Landing Page</h1>")
+
+    def panel(self, request: Request) -> Response:
+        """Highly secure administrative viewport workspace."""
+        user_name = request.session.get('user_name', 'Administrator')
+        return Response(f"Welcome back, {user_name}. This is your private dashboard.")
+--------------------------------------------------------------------------
+5. ARCHITECTURAL GUARDRAILS & TECHNICAL NOTES
+--------------------------------------------------------------------------
+
+* State Synchronization:
+  Because Global Middleware (like `StartSession`) resides at the base level 
+  of `_global_middleware` inside the Router, it executes *before* any 
+  route-specific controller validation checks. This ensures that features like 
+  `request.session` are populated and safe to use anywhere.
+
+* Absolute Paths vs Traversal Guards:
+  The asset streaming utility cleans boundaries via `os.path.abspath`. If 
+  a user attempts an asset-traversal attack (e.g., `/public/../../.env`), 
+  the system catches the path discrepancy and throws a clean 403 Forbidden 
+  `HttpError` exception to protect sensitive internal data.
+
+* Zero Global Registry Pollution:
+  Since controllers are instantiated per-request cycle inside the router dispatch 
+  loop, individual state variables do not leak across distinct user threads, 
+  ensuring full production thread-safety under heavy corporate environments.
+==========================================================================

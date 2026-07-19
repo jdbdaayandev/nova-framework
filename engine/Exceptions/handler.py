@@ -2,21 +2,20 @@ import html
 import traceback
 from engine.Routing.router import HttpError
 from engine.Http.response import Response
-from engine.Support.env import env
+from engine.Support.config import config  # Upgraded from engine.Support.env
 
 class ErrorHandler:
     
     @classmethod
     def handle_exception(cls, exception: Exception) -> Response:
-        """Handles Python exceptions and HttpErrors based on the ENVIRONMENT variable."""
-        # Query the exact ENVIRONMENT key name, defaulting safely to development
-        app_env = env('ENVIRONMENT', 'development').lower()
+        """Handles Python exceptions and HttpErrors based on the application configuration."""
+        # Check if the master app debug toggle is active
+        app_debug = config('app.debug', False)
         
         if isinstance(exception, HttpError):
             return cls.render_error_page(
                 status_code=exception.status_code, 
-                message=getattr(exception, 'message', 'Not Found'),
-                env=app_env
+                message=getattr(exception, 'message', 'Not Found')
             )
         
         # Log stack trace to console for the terminal runner
@@ -35,43 +34,44 @@ class ErrorHandler:
             
         exception_trace = traceback.format_exc()
         
-        if app_env == 'production':
-            # Complete visual block for production security
-            return cls.render_error_page(500, "Internal Server Error", env=app_env)
+        # Secure the application if debug mode is explicitly turned off
+        if not app_debug:
+            return cls.render_error_page(500, "Internal Server Error")
         
         # Fully verbose tracking UI for development mode
-        return cls.render_error_page(500, detailed_msg, exception_trace, env=app_env)
+        return cls.render_error_page(500, detailed_msg, exception_trace)
 
     @classmethod
     def handle_error_response(cls, response: Response) -> Response:
         """Intercepts manual 404/403/500 Responses from the router and styles them."""
         status_code = getattr(response, 'status_code', getattr(response, 'status', 200))
-        app_env = env('ENVIRONMENT', 'development').lower()
         
         if status_code >= 400:
             messages = {403: "Forbidden", 404: "Page Not Found", 405: "Method Not Allowed", 500: "Server Error"}
-            return cls.render_error_page(status_code, messages.get(status_code, "Error"), env=app_env)
+            return cls.render_error_page(status_code, messages.get(status_code, "Error"))
             
         return response
 
     @staticmethod
-    def render_error_page(status_code: int, message: str, exception_trace: str = "", env: str = "development") -> Response:
+    def render_error_page(status_code: int, message: str, exception_trace: str = "") -> Response:
         """Generates a contextual error page matching the clean look of the welcome index."""
         
-        is_dev = (env == 'development')
+        # Read parameters safely from the centralized application configuration repository
+        is_debug = config('app.debug', False)
+        app_env = config('app.env', 'production').upper()
         
         # Dynamic theme shifting elements
-        badge_text = "Development Mode" if is_dev else "System Error"
-        badge_style = "background-color: #fee2e2; color: #b91c1c;" if is_dev else "background-color: #e0e7ff; color: #3776AB;"
+        badge_text = "Development Mode" if is_debug else "System Error"
+        badge_style = "background-color: #fee2e2; color: #b91c1c;" if is_debug else "background-color: #e0e7ff; color: #3776AB;"
         
-        if is_dev:
+        if is_debug:
             description = "Nova Framework caught a runtime exception during the request lifecycle. Fix the structural implementation below."
         else:
             description = "We encountered an unexpected issue handling your request. The engineering team has been notified."
 
-        # Render traceback ONLY if we are in development mode
+        # Render traceback ONLY if we are in debug mode
         traceback_html = ""
-        if is_dev and exception_trace:
+        if is_debug and exception_trace:
             traceback_html = f"""
             <div class="traceback-wrapper">
                 <div class="traceback-header">
@@ -94,7 +94,7 @@ class ErrorHandler:
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>{status_code} — {message if is_dev else 'Error'}</title>
+            <title>{status_code} — {message if is_debug else 'Error'}</title>
             <style>
                 :root {{
                     --bg-color: #f8fafc;
@@ -293,7 +293,7 @@ class ErrorHandler:
                 <div class="error-heading">
                     <div class="status-code">{status_code}</div>
                     <div class="divider"></div>
-                    <div class="message {'prod' if not is_dev else ''}">{message}</div>
+                    <div class="message {'prod' if not is_debug else ''}">{message}</div>
                 </div>
 
                 <p class="description">
@@ -308,7 +308,7 @@ class ErrorHandler:
                 {traceback_html}
 
                 <footer>
-                    Nova Framework &nbsp;|&nbsp; Environment: <code>{env.upper()}</code>
+                    Nova Framework &nbsp;|&nbsp; Environment: <code>{app_env}</code>
                 </footer>
             </div>
         </body>

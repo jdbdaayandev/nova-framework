@@ -1,27 +1,23 @@
-import sys
+# File: bootstrap/app.py
 import os
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 from engine.Container.container import Container
 from engine.Routing.router import Router
-from routes.web import register_routes
+from engine.Support.env import load_env
+from engine.Support.config import ConfigRepository
 
-def create_app() -> Container:
-    """Bootstraps the framework and returns the application container."""
-    app = Container()
-
-    # 1. Bind configuration
-    app.singleton('config', lambda c: {
-        'app_name': 'My Strict Python Framework',
-        'env': 'local'
-    })
-
-    # 2. Bind the Router as a Singleton
-    app.singleton('router', lambda c: Router())
-
-    # 3. Load the Application Routes
-    router = app.make('router')
-    register_routes(router)
+def create_app():
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     
-    return app
+    # 1. Boot Environment Variables
+    load_env(os.path.join(base_dir, '.env'))
+    
+    # 2. Boot Configuration Repository (Triggers our updated importlib scanner)
+    ConfigRepository.load_from_directory(os.path.join(base_dir, 'config'))
+    
+    container = Container.getInstance()
+    container.singleton('router', lambda c: Router())
+    
+    import routes.web as web_routes
+    web_routes.register_routes(container.make('router'))
+    
+    return container

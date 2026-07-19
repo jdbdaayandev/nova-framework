@@ -1,0 +1,143 @@
+===============================================================================
+                       NOVA-ORM BASE MODEL REFERENCE GUIDE
+===============================================================================
+Location: engine/Database/model.py
+Pattern:  Active Record (Driver-Agnostic Engine)
+Supports: SQLite (?), MySQL (%s), PostgreSQL (%s)
+
+This document provides the API specifications and relationship blueprints for 
+extending Nova's Active Record implementation.
+
+-------------------------------------------------------------------------------
+1. OVERRIDE CONFIGURATION PROPERTIES
+-------------------------------------------------------------------------------
+Subclasses can define these properties at the class level to change default 
+mapping behaviors.
+
+* __table__ (str | None)
+  Explicitly sets the database table name. 
+  Default: If None, defaults to lowercase class name + 's' (e.g., User -> users)
+
+* __primary_key__ (str)
+  Defines the primary column identifier.
+  Default: 'id'
+
+* has_timestamps (bool)
+  Enables/disables automatic handling of date columns on save transactions.
+  Default: True (Automatically appends/updates 'created_at' & 'updated_at')
+
+-------------------------------------------------------------------------------
+2. PERSISTENCE & CRUD CORE METHODS
+-------------------------------------------------------------------------------
+
+@classmethod
+all() -> List[Model]
+  Queries and fetches every record mapped to the target database table.
+  Example:
+    users = User.all()
+
+@classmethod
+find(pk_value: Any) -> Model | None
+  Locates a record using its exact primary key column value.
+  Example:
+    user = User.find(12)
+
+@classmethod
+where(column: str, value: Any, operator: str = "=") -> List[Model]
+  Filters records by a specific column condition. Binding placeholders are 
+  automatically adjusted depending on whether SQLite, MySQL, or Postgres is running.
+  Example:
+    active_users = User.where('status', 'active')
+    high_clearance = User.where('clearance_level', 5, operator='>')
+
+@classmethod
+create(**kwargs) -> Model
+  Instantiates an instance, runs save routine to DB, and returns the model 
+  pre-populated with its newly assigned row identity.
+  Example:
+    post = Post.create(title="Hello World", user_id=1)
+
+save() -> Model
+  Handles dual operations seamlessly. Performs an UPDATE if an existing primary 
+  key is found. Triggers an INSERT if no identity exists. Automatically appends 
+  'created_at' and 'updated_at' text stamps if has_timestamps is True.
+  Example:
+    user = User.find(1)
+    user.email = "new_email@example.com"
+    user.save()
+
+delete() -> bool
+  Removes the current record matching the model's primary key from the table.
+  Returns True if successful, False if the entity was never persisted.
+  Example:
+    user = User.find(1)
+    user.delete()
+
+-------------------------------------------------------------------------------
+3. RELATIONSHIP ENGINE PROXIES
+-------------------------------------------------------------------------------
+
+has_many(related_class: Type[Model], foreign_key: str = None, local_key: str = None) -> List[Model]
+  Defines a one-to-many relationship mapping downstream children records.
+  - foreign_key: Defaults to '{current_class}_id' on downstream table.
+  - local_key:   Defaults to current model's primary key.
+  Example:
+    return self.has_many(Comment)
+
+belongs_to(related_class: Type[Model], foreign_key: str = None, owner_key: str = None) -> Model | None
+  Defines an inverse assignment pointing up to a parent entity record.
+  - foreign_key: Defaults to '{related_class}_id' on the current local table.
+  - owner_key:   Defaults to parent model's primary key.
+  Example:
+    return self.belongs_to(User)
+
+-------------------------------------------------------------------------------
+4. COMPLETE IMPLEMENTATION BLUEPRINT
+-------------------------------------------------------------------------------
+
+# --- app/Models/User.py ---
+from engine.Database.model import Model
+from app.Models.Post import Post
+
+class User(Model):
+    __table__ = 'users'          # Overrides automatic default naming
+    has_timestamps = True        # Tracks database mutation updates
+
+    def posts(self):
+        """Fetch all posts owned by this user."""
+        return self.has_many(Post)
+
+
+# --- app/Models/Post.py ---
+from engine.Database.model import Model
+from app.Models.User import User
+
+class Post(Model):
+    __table__ = 'posts'
+
+    def author(self):
+        """Fetch the specific user that owns this post."""
+        return self.belongs_to(User)
+
+
+# --- Example Pipeline Usage in a Controller ---
+def handle_request():
+    # 1. Fetch record
+    user = User.find(1)
+    
+    # 2. Extract collection proxy
+    user_posts = user.posts()
+    
+    # 3. Dynamic insertion
+    new_post = Post.create(
+        title="Decoupled Framework Complete",
+        body="Configuration repository fully online.",
+        user_id=user.id
+    )
+    
+    # 4. Inverted retrieval 
+    print(new_post.author().name)
+
+===============================================================================
+                 NOVA FRAMEWORK — ARCHITECTURE COMPLETE
+===============================================================================

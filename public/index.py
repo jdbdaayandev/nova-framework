@@ -1,94 +1,147 @@
+import mimetypes
 import os
 import sys
-import mimetypes
+from http import HTTPStatus
+from typing import Any, Callable, List, Optional
 
-# 1. Boot Environment with absolute root directory safety
-# (Prevents environment loading failures if server is executed from deep child directories)
+#--------------------------------------------------------------------------
+# Nova - A Zero-Dependency Python MVC Framework
+#--------------------------------------------------------------------------
+#
+# @package  Nova
+# @author   Nova Core Team
+#
+# The Front Controller serves as the universal gateway for all incoming
+# HTTP requests entering the application. Every request lifecycle is
+# orchestrated through this single file before dispatching to routes.
+#
+
+#--------------------------------------------------------------------------
+# Boot Environment & Path Guardrails
+#--------------------------------------------------------------------------
+#
+# To prevent structural environment loading failures when executing the
+# WSGI runner from deeply nested child directories, we calculate the
+# absolute directory root and inject it directly into the system path matrix.
+#
 PUBLIC_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_PATH = os.path.dirname(PUBLIC_DIR)
 
 if ROOT_PATH not in sys.path:
     sys.path.insert(0, ROOT_PATH)
 
-from engine.Support.env import load_env, env
+from engine.Support.env import load_env
 load_env(os.path.join(ROOT_PATH, '.env'))
 
-# 2. Bootstrap Core
+#--------------------------------------------------------------------------
+# Illuminate The Application Core
+#--------------------------------------------------------------------------
+#
+# Here, we instantiate the primary framework Application instance. This
+# component serves as the central Inversion of Control (IoC) Dependency
+# Injection container, binding services and managing component life scopes.
+#
 from bootstrap.app import create_app
 from engine.Http.request import Request
-from engine.Http.response import Response
 from engine.Exceptions.handler import ErrorHandler
 
-# Initialize DI Container
 app = create_app()
 
-def serve_static(path_info, start_response):
+#--------------------------------------------------------------------------
+# Serve Static Assets Interceptor
+#--------------------------------------------------------------------------
+#
+# Before executing heavy dynamic routing cycles, we attempt to isolate
+# and resolve requests pointing to physical asset files inside the public
+# tree. Strict boundary validation blocks path traversal attacks.
+#
+def serve_static(path_info: str, start_response: Callable) -> Optional[List[bytes]]:
     """
-    Attempts to serve a static asset out of the public folder directory tree. 
-    Returns the WSGI payload if found, otherwise returns None.
+    Safely resolves and streams requested public folder asset binaries.
     """
-    file_path = os.path.join(PUBLIC_DIR, path_info.lstrip('/'))
+    target_path = os.path.abspath(os.path.join(PUBLIC_DIR, path_info.lstrip('/')))
 
-    # Security Guard: Ensure execution targets files and blocks internal script exposure
-    if os.path.isfile(file_path) and not file_path.endswith('.py'):
-        mime_type, _ = mimetypes.guess_type(file_path)
-        content_type = mime_type or 'text/plain'
-        
-        with open(file_path, 'rb') as f:
-            content = f.read()
-            
-        start_response('200 OK', [('Content-Type', content_type)])
+    # Security validation pipeline:
+    # 1. Enforce physical existence check on disk.
+    # 2. Confirm target resides strictly inside the public folder root.
+    # 3. Suppress network visibility of dynamic engine scripts (.py).
+    if (
+        os.path.isfile(target_path)
+        and target_path.startswith(PUBLIC_DIR)
+        and not target_path.endswith('.py')
+    ):
+        mime_type, _ = mimetypes.guess_type(target_path)
+        content_type = mime_type or 'application/octet-stream'
+
+        with open(target_path, 'rb') as asset:
+            content = asset.read()
+
+        headers = [
+            ('Content-Type', content_type),
+            ('Content-Length', str(len(content)))
+        ]
+        start_response('200 OK', headers)
         return [content]
-        
+
     return None
 
-def application(environ, start_response):
+#--------------------------------------------------------------------------
+# Run The Application (WSGI Kernel Loop)
+#--------------------------------------------------------------------------
+#
+# The universal application loop captures the raw server environment array.
+# The payload transitions from a parsed Request object through a unified
+# routing pipeline, emerging as a fully standardized binary Response stream.
+#
+def application(environ: dict[str, Any], start_response: Callable) -> List[bytes]:
     """
-    The main WSGI Front Controller engine execution loop.
+    Primary execution kernel interface invoked by the WSGI application server.
     """
     path_info = environ.get('PATH_INFO', '/')
 
-    # 1. Intercept Static Assets
+    # Phase 1: Intercept asset pathways
     static_response = serve_static(path_info, start_response)
-    if static_response:
+    if static_response is not None:
         return static_response
 
-    # 2. Process Framework Request Pipeline
+    # Phase 2: Handle routing and component dispatching
     try:
         request = Request(environ)
         router = app.make('router')
-        
-        # Polymorphic Dispatch resolution hook
+
+        # Polymorphic router compatibility check
         if hasattr(router, 'dispatch'):
             response = router.dispatch(request)
         else:
             response = router.handle(request)
-            
-        # 🚀 Fix: Intercept clean HTTP error returns (404, 403, etc.) that didn't throw exceptions
-        response = ErrorHandler.handle_error_response(response)
-            
-    except Exception as e:
-        # 🚀 Handle runtime crashes, component failures, and HttpErrors
-        response = ErrorHandler.handle_exception(e)
 
-    # 3. Format and Send HTTP Response Headers
+        # Intercept explicit error returns (e.g., manual 404/403 states)
+        response = ErrorHandler.handle_error_response(response)
+
+    except Exception as exception:
+        # Intercept unhandled core crashes and render layout diagnostics
+        response = ErrorHandler.handle_exception(exception)
+
+    # Phase 3: Compile and structuralize HTTP response headers
     headers = list(response.headers.items()) if isinstance(response.headers, dict) else response.headers
-    
-    # Standardize status format to avoid wsgiref library type strictness crashes
+
+    # Phase 4: Enforce strict WSGI status line compatibility strings
     status_line = getattr(response, 'status_string', None)
     if not status_line:
         status_code = getattr(response, 'status', 200)
-        # Handle string or numerical input safely
         if isinstance(status_code, int):
-            status_map = {200: "200 OK", 403: "403 Forbidden", 404: "404 Not Found", 500: "500 Internal Server Error"}
-            status_line = status_map.get(status_code, f"{status_code} Error")
+            try:
+                http_status = HTTPStatus(status_code)
+                status_line = f"{http_status.value} {http_status.phrase}"
+            except ValueError:
+                status_line = f"{status_code} Unknown Status"
         else:
             status_line = str(status_code)
 
     start_response(status_line, headers)
-    
-    # 4. Stream Content Payload Binary Data
+
+    # Phase 5: Emit the binary packet payload back to the web daemon
     if isinstance(response.content, bytes):
         return [response.content]
-        
+
     return [str(response.content).encode('utf-8')]

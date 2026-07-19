@@ -1,0 +1,175 @@
+==============================================================================
+NOVA FRAMEWORK - SESSION COMPONENT USER GUIDE
+==============================================================================
+@package  Nova
+@author   Nova Core Team
+@version  1.0.0
+
+This documentation guide covers the registration, architecture, and day-to-day 
+runtime operations of the core Nova Session Engine backend layer.
+
+------------------------------------------------------------------------------
+TABLE OF CONTENTS
+------------------------------------------------------------------------------
+1. SYSTEM ARCHITECTURE RESOLUTION
+2. CORE SESSION CRUD OPERATIONS
+3. TEMPORARY FLASH STORAGE PIPELINE
+4. LIFECYCLE QUICK REFERENCE SYNTAX
+
+
+==============================================================================
+1. SYSTEM ARCHITECTURE RESOLUTION
+==============================================================================
+
+To make sessions active across HTTP operations, the framework requires the 
+StartSession middleware to intercept requests. This middleware automatically 
+resolves the driver defined in your `config/session.py` layout, handles the 
+client cookie handshake, and binds the data container onto the Request object.
+
+Add the following initialization routine inside your application bootstrap:
+
+------------------------------------------------------------------------------
+Snippet: App Kernel Initialization (app/Http/Kernel.py)
+------------------------------------------------------------------------------
+from engine.Session.SessionManager import SessionManager
+from engine.Session.Middleware.StartSession import StartSession
+
+# 1. Initialize the manager instance within your Framework Container
+session_manager = SessionManager(app)
+app.instance('session', session_manager)
+
+# 2. Append the lifecycle middleware to your HTTP routing pipeline
+middleware_stack = [
+    # ... other core global middlewares
+    StartSession(session_manager),
+]
+------------------------------------------------------------------------------
+
+* Note: Ensure your global HTTP Request object class includes a setter method:
+  `def set_session(self, session): self.session = session`
+  This lets the framework pipeline append the live workspace store seamlessly.
+
+
+==============================================================================
+2. CORE SESSION CRUD OPERATIONS
+==============================================================================
+
+Once the StartSession middleware is configured, the current session store is 
+directly accessible from the `request` parameter injected into your standard
+controller methods.
+
+------------------------------------------------------------------------------
+Snippet: Controller Implementation (app/Http/Controllers/UserController.py)
+------------------------------------------------------------------------------
+from engine.Http.request import Request
+from engine.Http.response import Response
+
+class UserController:
+
+    def login(self, request: Request) -> Response:
+        """
+        Authenticate a user session and store state boundaries.
+        """
+        # ... Your standard authentication checks happen here ...
+        user_id = 42
+        user_role = 'administrator'
+
+        # ASSIGN DATA: Use put() to write directly to the session store
+        request.session.put('user_id', user_id)
+        request.session.put('role', user_role)
+
+        return Response.redirect('/dashboard')
+
+    def dashboard(self, request: Request) -> Response:
+        """
+        Read state vectors out of the active session array allocations.
+        """
+        # GUARD CONDITION: Determine if a specific key boundary is initialized
+        if not request.session.has('user_id'):
+            return Response.redirect('/login')
+
+        # ACCESS DATA: Retrieve values via get() with an optional default fallback
+        user_id = request.session.get('user_id')
+        role = request.session.get('role', 'guest')
+
+        return Response.view('dashboard.html', {'user_id': user_id, 'role': role})
+
+    def logout(self, request: Request) -> Response:
+        """
+        Clear application states when a user signs out.
+        """
+        # DELETE SPECIFIC COORDINATE: Remove a single variable target
+        request.session.forget('role')
+
+        # PURGE ACTIVE SESSION FOOTPRINT: Completely wipe out all local values
+        request.session.flush()
+
+        return Response.redirect('/login')
+------------------------------------------------------------------------------
+
+
+==============================================================================
+3. TEMPORARY FLASH STORAGE PIPELINE
+==============================================================================
+
+Flash data is designed for temporary state messages (such as validation errors, 
+status updates, or transactional warnings). Flashed elements exist in storage 
+only for the very next HTTP request cycle, after which they automatically expire.
+
+------------------------------------------------------------------------------
+Snippet: Processing Flash Banners (app/Http/Controllers/SettingsController.py)
+------------------------------------------------------------------------------
+class SettingsController:
+
+    def update(self, request: Request) -> Response:
+        """
+        Execute modifications and flash a status notification payload.
+        """
+        # ... Perform validation and update updates safely here ...
+        
+        # FLASH PAYLOAD: Surrenders state persistence after exactly 1 request jump
+        request.session.flash('status', 'Profile configurations saved successfully!')
+
+        return Response.redirect('/settings')
+
+    def edit(self, request: Request) -> Response:
+        """
+        Render target form templates along with active flash contexts.
+        """
+        # Access flashed variables via standard get() syntax
+        status_message = request.session.get('status')
+
+        return Response.view('settings.html', {'status': status_message})
+
+    def intermediate_hop(self, request: Request) -> Response:
+        """
+        Extend flash lifetimes across multi-page redirect flows.
+        """
+        # REFLASH DATA: Keeps all existing flash values active for 1 more request
+        request.session.reflash()
+        
+        return Response.redirect('/final-destination')
+------------------------------------------------------------------------------
+
+
+==============================================================================
+4. LIFECYCLE QUICK REFERENCE SYNTAX
+==============================================================================
+
+The primary methods exposed by the `Store` instance match the standard API:
+
++--------------------+----------------------------------+--------------------+
+| Operation Target   | Sample Execution Syntax          | Output Paradigm   |
++--------------------+----------------------------------+--------------------+
+| Write Data         | request.session.put('x', 'y')    | None               |
+| Read Data          | request.session.get('x', None)   | Any / Fallback     |
+| Structural Check   | request.session.has('x')         | Boolean Value      |
+| Single Delete      | request.session.forget('x')      | None               |
+| Global Reset       | request.session.flush()          | None               |
+| Temp Flash Storage | request.session.flash('x', 'y')  | None (1-Cycle)     |
+| Retain Flash Data  | request.session.reflash()        | None (+1-Cycle)    |
++--------------------+----------------------------------+--------------------+
+
+==============================================================================
+[End of Document - Nova Session Framework Core System]
+==============================================================================
